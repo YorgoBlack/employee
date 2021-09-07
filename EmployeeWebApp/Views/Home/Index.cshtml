@@ -1,0 +1,141 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<table id="dg" title="Список сотрудников" class="easyui-datagrid" style="width:750px;height:250px"
+       url="/employee"
+       toolbar="#toolbar"
+       rownumbers="true" fitColumns="true" singleSelect="true">
+    <thead>
+        <tr>
+            <th field="StaffStr" width="30">Штатный №</th>
+            <th field="LastName" width="50">Фамилия</th>
+            <th field="FirstName" width="50">Имя</th>
+            <th field="MiddleName" width="50">Отчество</th>
+            <th field="BirthDayString" width="30">Дата рождения</th>
+            <th field="GenderStr" width="20">Пол</th>
+            <th field="IsInStaff" width="20" hidden="true">IsInStaff</th>
+            <th field="EmployeeId" width="20" hidden="true">EmployeeId</th>
+        </tr>
+    </thead>
+</table>
+<div id="toolbar">
+    <a href="#" class="easyui-linkbutton" iconCls="icon-man" plain="true" onclick="Import()">Импорт</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="newUser()">Добавить</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editUser()">Изменить</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyUser()">Удалить</a>
+</div>
+
+
+@Html.Partial("Edit")
+@Html.Partial("Import")
+
+<script type="text/javascript">
+    var url;
+
+    function Import() {
+        $('#import_dlg').dialog('open').dialog('setTitle', 'Загрузить список сотрудников');
+        $('#ffUpload').form('clear');
+        url = '/employee/Import';
+    }
+    function ExecImport() {
+        $('#import_dlg').dialog('close');
+        let formData = new FormData();
+        let finput = document.getElementById('iFileInput');
+        let fdata = finput.files[0];
+        formData.append("fdata", fdata);
+        fetch(url, { method: "POST", body: formData })
+            .then(res => res.blob())
+            .then(blob => {
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = "result.txt";
+                document.body.appendChild(a); 
+                a.click();
+                a.remove();
+                $('#dg').datagrid('reload');
+            });
+    }
+
+
+    function newUser() {
+        $('#dlg').dialog('open').dialog('setTitle', 'Новый сотрудник');
+        $('#fm').form('clear');
+        url = '/employee/Create';
+
+        $("#iIsInStaff").switchbutton({ checked: true });
+        iCheckChange(true);
+    }
+
+    function editUser() {
+        var row = $('#dg').datagrid('getSelected');
+        if (row) {
+            $('#dlg').dialog('open').dialog('setTitle', 'Изменение данных');
+            $('#fm').form('load', row);
+            url = '/employee/Edit';
+            let f = getSelectedValue('#dg', 'IsInStaff');
+            $("#iIsInStaff").switchbutton({ checked: f });
+            iCheckChange(f);
+        }
+    }
+
+    function saveUser() {
+        $('#fm').form('submit', {
+            url: url,
+            onSubmit: function () {
+                console.log('sumbit');
+                return $(this).form('enableValidation').form('validate');
+            },
+            success: function (result) {
+                var result = eval('(' + result + ')');
+                if (result.errorMsg) {
+                    $.messager.show({
+                        title: 'Error',
+                        msg: result.errorMsg
+                    });
+                } else {
+                    $('#dlg').dialog('close');        // close the dialog
+                    $('#dg').datagrid('reload');    // reload the user data
+                }
+            }
+        });
+    }
+
+    function destroyUser() {
+        var row = $('#dg').datagrid('getSelected');
+        if (row) {
+            let fio = getSelectedValue('#dg', 'LastName') + ' ' + getSelectedValue('#dg', 'FirstName') + ' ' + getSelectedValue('#dg', 'MiddleName');
+            $.messager.confirm('Confirm', 'Вы действительно хотите удалить сотрудника ' + fio + '?', function (r) {
+                if (r) {
+                    $.post('/employee/Delete', { id: getSelectedValue('#dg', 'EmployeeId') }, function (result) {
+                        if (result.success) {
+                            $('#dg').datagrid('reload');    // reload the user data
+                        } else {
+                            $.messager.show({    // show error message
+                                title: 'Error',
+                                msg: result.errorMsg
+                            });
+                        }
+                    }, 'json');
+                }
+            });
+        }
+    }
+
+    function getSelectedValue(dg, field) {
+        var dg = $(dg);
+        var row = dg.datagrid('getSelected');
+        if (!row) { return undefined; }
+        var fields = dg.datagrid('getColumnFields', true).concat(dg.datagrid('getColumnFields', false));
+        if (typeof field == 'number') {
+            return row[fields[field]];
+        } else {
+            return row[field];
+        }
+    }
+
+</script>
+
+
+

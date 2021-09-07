@@ -1,0 +1,19 @@
+﻿<div style="visibility:collapse">
+    <!-- upload dialog-->
+    <div id="import_dlg" class="easyui-dialog" title="Complex Toolbar on Dialog" style="width:400px;height:140px;padding:10px" data-options="
+				closed: true,
+				modal: true,
+                iconCls: 'icon-save',
+                buttons: '#dlg-buttons'
+            ">
+        <form enctype="multipart/form-data" id="ffUpload" name="ffUpload" method="post">
+            <input type="file" id="iFileInput"/>
+        </form>
+    </div>
+    <div id="dlg-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript: ExecImport()">Upload</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:$('#import_dlg').dialog('close')">Cancel</a>
+    </div>
+    <!-- upload dialog-->
+</div>
+

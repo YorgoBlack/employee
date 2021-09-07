@@ -1,0 +1,77 @@
+﻿<div style="visibility:collapse">
+    <div id="dlg" class="easyui-dialog" style="width:400px;height:280px;padding:10px 20px;"
+         closed="true" buttons="#dlg-buttons">
+
+        <form id="fm" method="post" data-options="novalidate:true">
+            <input type="hidden" name="EmployeeId" />
+            <div class="fitem">
+                <label style="width:100px;">Фамилия:</label>
+                <input name="LastName" class="easyui-textbox" data-options="required:true">
+            </div>
+            <div class="fitem">
+                <label style="width:100px;">Имя:</label>
+                <input name="FirstName" class="easyui-textbox" data-options="required:true">
+            </div>
+            <div class="fitem">
+                <label style="width:100px;">Отчество:</label>
+                <input name="MiddleName" class="easyui-textbox" data-options="required:true">
+            </div>
+            <div class="fitem">
+                <label style="width:100px;">Дата рождения:</label>
+                <input name="BirthDayString" class="easyui-datebox" data-options="formatter:date_formatter,parser:date_parser,required:true">
+            </div>
+            <div class="fitem">
+                <label style="width:100px;">Пол:</label>
+                <select name="Gender" class="easyui-combobox" style="width:100px;" data-options="panelHeight:'auto',required:true">
+                    <option value="0">муж.</option>
+                    <option value="1">жен.</option>
+                </select>
+            </div>
+
+            <div class="fitem">
+                <label style="width:100px;">В штате:</label>
+            </div>
+            
+            <div class="fitem">
+                <input id="iIsInStaff" name="IsInStaff" class="easyui-switchbutton" style="width:100px;"
+                       data-options="onChange:iCheckChange,onText:'Да',offText:'Нет'">
+                <input id="iStaffNo" name="StaffNo" class="easyui-numberbox" data-options="disabled: true,required: false, prompt: 'Штатный номер'">
+            </div>
+        </form>
+    </div>
+    <div id="dlg-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveUser()" style="width:90px">Save</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancel</a>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function iCheckChange(aChecked) {
+        console.log(aChecked);
+        $('#iStaffNo').numberbox(aChecked ? 'enable' : 'disable');
+        $('#iStaffNo').numberbox('options').required = aChecked;
+        $('#iStaffNo').numberbox('textbox').validatebox('options').required = aChecked;
+        $('#iStaffNo').numberbox('validate');
+    };
+
+
+    function date_formatter(date) {
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        var d = date.getDate();
+        return (d < 10 ? ('0' + d) : d) + '.' + (m < 10 ? ('0' + m) : m) + '.' + y;
+    }
+    function date_parser(s) {
+        if (!s) return new Date();
+        var ss = (s.split('.'));
+        var d = parseInt(ss[0], 10);
+        var m = parseInt(ss[1], 10);
+        var y = parseInt(ss[2], 10);
+        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+            return new Date(y, m - 1, d);
+        } else {
+            return new Date();
+        }
+    }
+</script>
